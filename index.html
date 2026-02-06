@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Dragon Demo</title>
+
+    <!-- Libraries -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script
+        src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
+    <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        #status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 10000;
+            text-align: center;
+        }
+
+        .btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid white;
+            color: white;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 10000;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="status">Initializing AR...</div>
+    <button id="jump-btn" class="btn">JUMP!</button>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;"
+        renderer="logarithmicDepthBuffer: true; alpha: true;" vr-mode-ui="enabled: false" gesture-detector>
+
+        <a-assets>
+            <audio id="sound" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.mp3"></audio>
+        </a-assets>
+
+        <a-marker preset="hiro" id="marker">
+            <a-entity id="dragon" position="0 0 0" scale="5 5 5" rotation="-90 0 0" class="clickable"
+                gesture-handler="minScale: 1; maxScale: 10"
+                gltf-model="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF-Binary/DragonAttenuation.glb"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+
+                <a-entity id="particles" position="0 0 0"
+                    particle-system="preset: dust; color: yellow; particleCount: 200; enabled: false"></a-entity>
+            </a-entity>
+
+            <a-entity light="type: ambient; intensity: 1"></a-entity>
+            <a-entity light="type: directional; intensity: 1.5" position="1 1 1"></a-entity>
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script>
+        const status = document.getElementById('status');
+        const btn = document.getElementById('jump-btn');
+
+        // Explicit camera permission check
+        async function checkCamera() {
+            try {
+                status.innerText = 'Requesting camera permission...';
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                status.innerText = '✅ Camera ready! Point at Hiro marker.';
+                stream.getTracks().forEach(track => track.stop()); // Stop test stream
+                return true;
+            } catch (err) {
+                status.innerHTML = `❌ Camera Error: ${err.message}<br><small>Please allow camera access in browser settings</small>`;
+                status.style.background = 'rgba(255,0,0,0.8)';
+                return false;
+            }
+        }
+
+        // Check camera on load
+        window.addEventListener('load', async () => {
+            const hasCamera = await checkCamera();
+            if (!hasCamera) return;
+
+            // Wait for AR.js to initialize
+            setTimeout(() => {
+                status.innerText = 'Point camera at Hiro marker';
+                btn.style.display = 'block';
+            }, 2000);
+        });
+
+        // Marker events
+        const marker = document.querySelector('#marker');
+        if (marker) {
+            marker.addEventListener('markerFound', () => {
+                status.innerText = '🐉 Dragon found!';
+            });
+            marker.addEventListener('markerLost', () => {
+                status.innerText = 'Marker lost - keep scanning';
+            });
+        }
+
+        // Jump button
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const dragon = document.querySelector('#dragon');
+            const particles = document.querySelector('#particles');
+            const sound = document.querySelector('#sound');
+
+            if (dragon) {
+                dragon.setAttribute('animation__jump', 'property: position; to: 0 0 2; dur: 300; easing: easeOutQuad');
+                setTimeout(() => {
+                    dragon.setAttribute('animation__jump', 'property: position; to: 0 0 0; dur: 300; easing: easeInQuad');
+                }, 300);
+            }
+
+            if (sound) sound.play();
+            if (particles) {
+                particles.setAttribute('particle-system', 'enabled', true);
+                setTimeout(() => particles.setAttribute('particle-system', 'enabled', false), 1000);
+            }
+        });
+    </script>
+</body>
+
+</html>
