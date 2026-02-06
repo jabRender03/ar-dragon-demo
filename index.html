@@ -1,166 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Dragon Demo</title>
+    <title>AR Markerless Demo</title>
 
-    <!-- Libraries -->
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script
-        src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
-    <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
+    <!-- Import Model Viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
     <style>
         body {
             margin: 0;
-            overflow: hidden;
-            font-family: sans-serif;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2d2d2d;
         }
 
-        #status {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            z-index: 10000;
-            text-align: center;
+        model-viewer {
+            width: 100vw;
+            height: 100vh;
+            --poster-color: transparent;
         }
 
-        .btn {
-            position: fixed;
-            bottom: 20px;
+        #ar-button {
+            background-image: url(https://modelviewer.dev/assets/ic_view_in_ar_new_googblue_48dp.png);
+            background-repeat: no-repeat;
+            background-size: 20px 20px;
+            background-position: 12px 50%;
+            background-color: #fff;
+            position: absolute;
             left: 50%;
+            bottom: 30px;
             transform: translateX(-50%);
-            padding: 12px 30px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid white;
+            white-space: nowrap;
+            padding: 0px 16px 0px 40px;
+            font-family: Roboto Regular, Helvetica Neue, sans-serif;
+            font-size: 14px;
+            color: #4285f4;
+            height: 36px;
+            line-height: 36px;
+            border-radius: 18px;
+            border: 1px solid #DADCE0;
+        }
+
+        #ar-button:active {
+            background-color: #E8EAED;
+        }
+
+        #ar-button:focus {
+            outline: none;
+        }
+
+        #ar-button:focus-visible {
+            outline: 1px solid #4285f4;
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
             color: white;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 10000;
-            display: none;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin: 5px 0 0;
+            color: #aaa;
         }
     </style>
 </head>
 
 <body>
-    <div id="status">Initializing AR...</div>
-    <button id="jump-btn" class="btn">JUMP!</button>
+    <div class="title">
+        <h1>AR Space Demo</h1>
+        <p>Tap button below or view in 3D</p>
+    </div>
 
-    <a-scene arjs="sourceType: webcam; debugUIEnabled: false;"
-        renderer="logarithmicDepthBuffer: true; alpha: true; antialias: true; colorManagement: true; sortObjects: true; physicallyCorrectLights: true;"
-        vr-mode-ui="enabled: false" gesture-detector>
+    <!-- 
+    Model Viewer Component 
+    - src: The 3D model (Astronaut)
+    - ar: Enables AR mode
+    - ar-modes: Prioritizes WebXR (stable Android AR), falls back to Scene Viewer
+    - camera-controls: Allows rotating/zooming locally
+    - auto-rotate: Spins the model
+  -->
+    <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+        ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+        poster="https://modelviewer.dev/assets/poster-astronaut.png" alt="A 3D model of an astronaut"
+        shadow-intensity="1" camera-controls auto-rotate ar ar-modes="webxr scene-viewer quick-look">
 
-        <a-assets>
-            <audio id="sound" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.mp3"></audio>
-        </a-assets>
+        <button slot="ar-button" id="ar-button">
+            View in your space
+        </button>
 
-        <a-marker preset="hiro" id="marker">
-            <a-entity id="dragon" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 0 0" class="clickable"
-                gesture-handler="minScale: 0.02; maxScale: 2"
-                gltf-model="https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
-
-                <a-entity id="particles" position="0 2 0"
-                    particle-system="preset: dust; color: yellow; particleCount: 200; enabled: false"></a-entity>
-            </a-entity>
-
-            <a-text value="AR DUCK!" position="0 1.5 0" align="center" color="#FFD700" width="4"></a-text>
-
-            <a-entity light="type: ambient; intensity: 1"></a-entity>
-            <a-entity light="type: directional; intensity: 1.5" position="1 1 1"></a-entity>
-        </a-marker>
-
-        <a-entity camera></a-entity>
-    </a-scene>
-
-    <script>
-        const status = document.getElementById('status');
-        const btn = document.getElementById('jump-btn');
-        const dragon = document.getElementById('dragon');
-
-        // Debug Model Loading
-        if (dragon) {
-            dragon.addEventListener('model-loaded', () => {
-                console.log('Model Loaded!');
-                status.innerText = '✅ Model Loaded! Scan Marker.';
-                status.style.background = 'rgba(0,100,0,0.8)';
-            });
-
-            dragon.addEventListener('model-error', (e) => {
-                console.error('Model Error:', e);
-                status.innerText = '❌ Model Failed to Load!';
-                status.style.background = 'rgba(255,0,0,0.8)';
-            });
-        }
-
-        // Explicit camera permission check
-        async function checkCamera() {
-            try {
-                status.innerText = 'Requesting camera permission...';
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                status.innerText = '✅ Camera ready! Point at Hiro marker.';
-                stream.getTracks().forEach(track => track.stop()); // Stop test stream
-                return true;
-            } catch (err) {
-                status.innerHTML = `❌ Camera Error: ${err.message}<br><small>Please allow camera access in browser settings</small>`;
-                status.style.background = 'rgba(255,0,0,0.8)';
-                return false;
-            }
-        }
-
-        // Check camera on load
-        window.addEventListener('load', async () => {
-            const hasCamera = await checkCamera();
-            if (!hasCamera) return;
-
-            // Wait for AR.js to initialize
-            setTimeout(() => {
-                status.innerText = 'Point camera at Hiro marker';
-                btn.style.display = 'block';
-            }, 2000);
-        });
-
-        // Marker events
-        const marker = document.querySelector('#marker');
-        if (marker) {
-            marker.addEventListener('markerFound', () => {
-                status.innerText = '🐉 Dragon found!';
-            });
-            marker.addEventListener('markerLost', () => {
-                status.innerText = 'Marker lost - keep scanning';
-            });
-        }
-
-        // Jump button
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const dragon = document.querySelector('#dragon');
-            const particles = document.querySelector('#particles');
-            const sound = document.querySelector('#sound');
-
-            if (dragon) {
-                dragon.setAttribute('animation__jump', 'property: position; to: 0 0 2; dur: 300; easing: easeOutQuad');
-                setTimeout(() => {
-                    dragon.setAttribute('animation__jump', 'property: position; to: 0 0 0; dur: 300; easing: easeInQuad');
-                }, 300);
-            }
-
-            if (sound) sound.play();
-            if (particles) {
-                particles.setAttribute('particle-system', 'enabled', true);
-                setTimeout(() => particles.setAttribute('particle-system', 'enabled', false), 1000);
-            }
-        });
-    </script>
+        <div id="ar-prompt">
+            <img src="https://modelviewer.dev/assets/hand-notification.png">
+        </div>
+    </model-viewer>
 </body>
 
 </html>
