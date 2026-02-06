@@ -1,47 +1,32 @@
-# AR Dragon Demo 🐉
+# 🤖 Markerless Robot AR Demo
 
-An interactive Augmented Reality experience featuring a 3D dragon model with gestures, animations, and particle effects.
+A modern WebAR experience featuring an interactive, animated 3D robot that can be placed in your real-world space. Built using Google's `<model-viewer>`.
 
-## Features
+## 🚀 Live Demo
+**[Launch AR Experience](https://jabRender03.github.io/ar-dragon-demo/)**
+*(Best viewed on Android Chrome)*
 
-- **Professional 3D Model**: High-quality dragon from Khronos Group glTF samples
-- **Interactive Animations**: Tap to make the dragon jump with particle effects
-- **Gesture Controls**: Pinch to scale, rotate with two fingers
-- **Real-time Shadows**: Dynamic shadow casting for realistic grounding
-- **Audio Feedback**: Sound effects on interaction
-- **Mobile Optimized**: Works on Android phones with camera access
+## ✨ Features
+- **Markerless AR**: No printed markers needed! Uses native ARCore/ARKit to detect floors and tables.
+- **Interactive Robot**: Fun, expressive robot with multiple animation clips.
+- **Animation Controls**: Choose between different movements like *Dance*, *Jump*, *Wave*, and *Run*.
+- **Depth Occlusion**: Real-world objects can hide the virtual robot for a highly realistic "immersed" feeling.
+- **Intuitive Gestures**: 
+  - **Drag**: Move the robot around the floor.
+  - **Pinch**: Scale the robot up or down.
+  - **Twist**: Rotate the robot.
 
-## How to Use
+## 🛠️ Built With
+- **[Model Viewer](https://modelviewer.dev/)**: A web component for rendering 3D models and starting AR.
+- **[WebXR](https://immersiveweb.dev/)**: For high-performance, browser-native AR.
 
-1. **Open the demo**: Visit the GitHub Pages link (see below)
-2. **Allow camera access** when prompted
-3. **Print the Hiro marker**: [Download here](https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png)
-4. **Point your camera** at the marker
-5. **Interact**: Tap the dragon or use the JUMP button
+## 📱 How to Use
+1. Open the [Live Demo](https://jabRender03.github.io/ar-dragon-demo/) on your Android phone using Chrome.
+2. View the Robot in 3D directly on the page.
+3. Tap **"View in your space"**.
+4. Point your camera at a flat surface (floor/table) and move the phone slightly.
+5. Tap to place the robot and start interacting!
 
-## Technologies
-
-- [A-Frame](https://aframe.io/) - WebVR framework
-- [AR.js](https://ar-js-org.github.io/AR.js-Docs/) - Augmented Reality for the web
-- [glTF](https://www.khronos.org/gltf/) - 3D model format
-
-## Live Demo
-
-🔗 **[Launch AR Demo](https://YOUR-USERNAME.github.io/ar-dragon-demo/ar-demo.html)**
-
-## Local Development
-
-```bash
-# Start local server
-python -m http.server 8000
-
-# Visit in browser
-http://localhost:8000/ar-demo.html
-```
-
-**Note**: HTTPS is required for camera access on mobile devices.
-
-## Credits
-
-- Dragon Model: [Khronos Group glTF Sample Assets](https://github.com/KhronosGroup/glTF-Sample-Assets)
-- Built with assistance from Google Deepmind's Antigravity AI
+## 📄 License
+This project is open-source and free to use.
+- **3D Model**: [RobotExpressive.glb](https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/RobotExpressive) (CC Attribution)
