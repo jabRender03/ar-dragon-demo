@@ -76,6 +76,33 @@
             margin: 5px 0 0;
             color: #aaa;
         }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+        }
+
+        select {
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            backdrop-filter: blur(5px);
+            -webkit-appearance: none;
+            text-align: center;
+            cursor: pointer;
+            width: 100%;
+        }
     </style>
 </head>
 
@@ -102,8 +129,8 @@
     <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
         ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
         poster="https://modelviewer.dev/assets/poster-astronaut.png" alt="A 3D model of an astronaut"
-        shadow-intensity="2" shadow-softness="1" camera-controls auto-rotate ar ar-modes="scene-viewer webxr quick-look"
-        ar-placement="floor" ar-scale="auto" style="touch-action: none;">
+        shadow-intensity="2" shadow-softness="1" camera-controls auto-rotate autoplay ar
+        ar-modes="scene-viewer webxr quick-look" ar-placement="floor" ar-scale="auto" style="touch-action: none;">
 
         <button slot="ar-button" id="ar-button">
             View in your space
@@ -112,7 +139,45 @@
         <div id="ar-prompt">
             <img src="https://modelviewer.dev/assets/hand-notification.png">
         </div>
+
+        <div class="controls">
+            <select id="animation-select">
+                <option value="default">Default Animation</option>
+            </select>
+        </div>
     </model-viewer>
+
+    <script>
+        const modelViewer = document.querySelector('model-viewer');
+        const animSelect = document.querySelector('#animation-select');
+
+        // Populate animation dropdown once model loads
+        modelViewer.addEventListener('load', () => {
+            const animations = modelViewer.availableAnimations;
+            console.log('Available animations:', animations);
+
+            // Clear existing options except default if needed, or just rebuild
+            animSelect.innerHTML = '';
+
+            animations.forEach((anim) => {
+                const option = document.createElement('option');
+                option.value = anim;
+                option.textContent = anim;
+                animSelect.appendChild(option);
+            });
+
+            // Set initial value
+            if (animations.length > 0) {
+                animSelect.value = animations[0];
+            }
+        });
+
+        // Handle animation change
+        animSelect.addEventListener('change', (event) => {
+            modelViewer.animationName = event.target.value;
+            modelViewer.play(); // Ensure it plays
+        });
+    </script>
 </body>
 
 </html>
