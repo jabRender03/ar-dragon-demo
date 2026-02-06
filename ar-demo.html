@@ -8,7 +8,7 @@
 
     <!-- AR.js and A-Frame Libraries (loads from internet) -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <!-- Particle System Component -->
     <script
         src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
@@ -145,10 +145,11 @@
     </div>
 
     <!-- AR Scene -->
-    <!-- Removed 'embedded' to allow fullscreen AR and fix white screen issues -->
-    <a-scene arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-        vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true; precision: medium;" shadow="type: pcfsoft"
-        gesture-detector id="arScene">
+    <!-- AR Scene with embedded and alpha for GitHub Pages compatibility -->
+    <a-scene embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true; precision: medium; alpha: true;"
+        shadow="type: pcfsoft" gesture-detector id="arScene">
 
         <!-- Assets Management -->
         <a-assets>
