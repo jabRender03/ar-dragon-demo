@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick AR Test - Point at Marker!</title>
+
+    <!-- AR.js and A-Frame Libraries (loads from internet) -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <!-- Particle System Component -->
+    <script
+        src="https://unpkg.com/aframe-particle-system-component@1.0.x/dist/aframe-particle-system-component.min.js"></script>
+    <!-- AR.js Gestures -->
+    <script src="https://raw.githack.com/fcor/arjs-gestures/master/dist/gestures.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #instructions {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        #instructions h2 {
+            margin: 0 0 10px 0;
+            width: 100%;
+            height: 100%;
+            background-color: transparent !important;
+        }
+
+        /* Force AR.js video to background */
+        #arjs-video {
+            z-index: -1 !important;
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+        }
+
+        /* Make A-Frame Canvas transparent */
+        canvas.a-canvas {
+            z-index: 1 !important;
+            background-color: transparent !important;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        /* UI Styles */
+        .ui-container {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .btn {
+            pointer-events: auto;
+            background: rgba(255, 255, 210, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffe;
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        #instructions {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 1000;
+            width: 80%;
+            box-sizing: border-box;
+        }
+
+        #instructions h2 {
+            margin: 0 0 10px 0;
+            color: #00ff00;
+        }
+
+        #instructions p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        #instructions a {
+            color: #00ddff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- UI Controls -->
+    <div class="ui-container">
+        <button id="jump-btn" class="btn" style="opacity: 0.5; pointer-events: none;">✨ JUMP ✨</button>
+    </div>
+
+    <!-- Instructions Overlay -->
+    <div id="instructions">
+        <h2>🎯 AR Demo Ready!</h2>
+        <p style="font-size: 11px; color: #aaa; margin-top: 10px;">
+            (Or display the marker on another device's screen)
+        </p>
+    </div>
+
+    <!-- AR Scene -->
+    <!-- Removed 'embedded' to allow fullscreen AR and fix white screen issues -->
+    <a-scene arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+        vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true; precision: medium;" shadow="type: pcfsoft"
+        gesture-detector id="arScene">
+
+        <!-- Assets Management -->
+        <a-assets>
+            <audio id="magic-sound" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.mp3"
+                preload="auto"></audio>
+        </a-assets>
+
+        <!-- Camera with Cursor for Click Interaction -->
+        <a-entity camera>
+            <a-entity cursor="rayOrigin: mouse" raycaster="objects: .clickable" position="0 0 -1"
+                geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03" material="color: black; shader: flat">
+            </a-entity>
+        </a-entity>
+
+        <!-- Marker Detection: When "Hiro" marker is detected, show this -->
+        <a-marker preset="hiro" id="marker" markerhandler>
+
+            <!-- Lights & Shadow Plane (Grounding) -->
+            <a-entity light="type: ambient; color: #BBB; intensity: 0.5"></a-entity>
+            <a-entity
+                light="type: directional; color: #FFF; intensity: 1.2; castShadow: true; shadowMapHeight: 2048; shadowMapWidth: 2048; shadowCameraTop: 5; shadowCameraBottom: -5; shadowCameraRight: 5; shadowCameraLeft: -5; target: #creature"
+                position="2 4 2"></a-entity>
+
+            <a-plane rotation="-90 0 0" position="0 0 0" width="3" height="3" shadow="receive: true"
+                material="color: #000; opacity: 0.3; transparent: true; depthWrite: false"></a-plane>
+
+            <!-- MAIN 3D OBJECT: 3D Scanned Dragon -->
+            <a-entity id="creature" class="clickable" gesture-handler="minScale: 1; maxScale: 10" shadow="cast: true"
+                position="0 0 0" rotation="0 -90 0" scale="5 5 5"
+                gltf-model="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DragonAttenuation/glTF-Binary/DragonAttenuation.glb"
+                animation="property: rotation; to: 0 270 0; loop: true; dur: 5000; easing: linear"
+                animation__jump="property: position; to: 0 1 0; dur: 500; easing: easeOutQuad; startEvents: click"
+                animation__return="property: position; to: 0 0 0; dur: 500; easing: easeInQuad; startEvents: animationcomplete__jump">
+
+                <!-- Particle System (Magic Dust) - Initially disabled/hidden -->
+                <a-entity id="magic-particles" position="0 0.5 0"
+                    particle-system="preset: dust; color: #FFD700, #FFA500; particleCount: 500; size: 0.5; enabled: false">
+                </a-entity>
+
+                <!-- Sound Effect -->
+                <a-sound src="#magic-sound" poolSize="3"></a-sound>
+            </a-entity>
+
+            <!-- Stats Text (floating below creature) -->
+            <a-text value="STANFORD DRAGON\nSource: Khronos Group\nType: 3D Scan" position="0 -0.2 0" align="center"
+                color="#ffff00" width="3"
+                animation="property: position; to: 0 0 0; loop: true; dir: alternate; dur: 3000">
+            </a-text>
+
+            <!-- Platform/Base (so it looks like it's standing on something) -->
+            <a-cylinder position="0 0 0" radius="0.5" height="0.05" color="#333333" metalness="0.8" roughness="0.2"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+            </a-cylinder>
+
+        </a-marker>
+    </a-scene>
+
+    <script>
+        // Custom component to handle marker detection events
+        AFRAME.registerComponent('markerhandler', {
+            init: function () {
+                const marker = this.el;
+                const instructions = document.getElementById('instructions');
+                const jumpBtn = document.getElementById('jump-btn');
+
+                // When marker is found (card detected!)
+                marker.addEventListener('markerFound', function () {
+                    console.log('🎯 Marker detected! Dragon summoned!');
+                    instructions.classList.add('hide');
+                    jumpBtn.style.opacity = '1';
+                    jumpBtn.style.pointerEvents = 'auto';
+                });
+
+                // When marker is lost (card removed from view)
+                marker.addEventListener('markerLost', function () {
+                    console.log('👻 Marker lost! Dragon vanished!');
+                    instructions.classList.remove('hide'); // Show instructions again
+                    jumpBtn.style.opacity = '0.5';
+                    jumpBtn.style.pointerEvents = 'none';
+                });
+            }
+        });
+
+        // Dragon Click Interaction
+        const dragon = document.querySelector('#creature');
+
+        // Reusable jump function
+        function triggerJump() {
+            console.log('🐉 Jump triggered!');
+            dragon.emit('click'); // Built-in emit to trigger A-Frame animations attached to click
+
+            // Audio & Particles (Manual trigger since 'click' on entity works differently withemit sometimes)
+            // But since our logic stays in the click listener below, emitting 'click' is enough.
+        }
+
+        dragon.addEventListener('click', function () {
+            console.log('🐉 Dragon clicked!');
+
+            // Play Sound
+            const sound = this.components.sound;
+            if (sound) {
+                sound.playSound();
+            }
+
+            // Trigger Particles
+            const particles = document.querySelector('#magic-particles');
+            if (particles) {
+                // Enable particles
+                particles.setAttribute('particle-system', 'enabled', true);
+
+                // Disable after a short burst
+                setTimeout(() => {
+                    particles.setAttribute('particle-system', 'enabled', false);
+                }, 1000);
+            }
+        });
+
+        // UI Button Handler
+        document.getElementById('jump-btn').addEventListener('click', function (e) {
+            e.stopPropagation(); // Prevent passing click to scene raycaster
+            triggerJump();
+        });
+
+        // Show loading status
+        window.addEventListener('load', function () {
+            console.log('✅ AR System Ready!');
+            console.log('📱 Point your camera at the Hiro marker');
+        });
+
+        // Handle camera permission errors
+        window.addEventListener('arjs-video-loaded', function () {
+            console.log('📹 Camera activated successfully!');
+        });
+    </script>
+</body>
+
+</html>

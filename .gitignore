@@ -1,0 +1,13 @@
+# Development files
+ar-codepen*.html
+ar-codepen-*.html
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
