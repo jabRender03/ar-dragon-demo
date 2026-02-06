@@ -31,17 +31,19 @@
             background-color: #fff;
             position: absolute;
             left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            white-space: nowrap;
-            padding: 0px 16px 0px 40px;
-            font-family: Roboto Regular, Helvetica Neue, sans-serif;
-            font-size: 14px;
-            color: #4285f4;
-            height: 36px;
-            line-height: 36px;
-            border-radius: 18px;
-            border: 1px solid #DADCE0;
+            /* Responsive positioning */
+            bottom: 5%;
+            min-height: 40px;
+            /* Better touch target */
+            padding: 0px 24px 0px 48px;
+            background-size: 24px 24px;
+            background-position: 16px 50%;
+            font-size: 16px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+            /* Handle visual obstruction */
+            z-index: 10000;
+            border: none;
+            cursor: pointer;
         }
 
         #ar-button:active {
@@ -91,10 +93,17 @@
     - camera-controls: Allows rotating/zooming locally
     - auto-rotate: Spins the model
   -->
+    <!-- 
+      AR Attributes:
+      - ar-placement="floor": Optimizes for floor tracking (sticking)
+      - ar-scale="auto": Allows realistic scaling
+      - touch-action="pan-y": Prevents scrolling while interacting
+    -->
     <model-viewer src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
         ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
         poster="https://modelviewer.dev/assets/poster-astronaut.png" alt="A 3D model of an astronaut"
-        shadow-intensity="1" camera-controls auto-rotate ar ar-modes="webxr scene-viewer quick-look">
+        shadow-intensity="1" shadow-softness="1" camera-controls auto-rotate ar ar-modes="webxr scene-viewer quick-look"
+        ar-placement="floor" ar-scale="auto" touch-action="pan-y">
 
         <button slot="ar-button" id="ar-button">
             View in your space
